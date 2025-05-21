@@ -15,6 +15,7 @@ model Usuario {
   rol       Rol
   proyectos UsuarioProyecto[]
   tareas    Tarea[]           @relation("UsuarioTarea")
+  horasTrabajo HorasTrabajo[]
 }
 
 model Proyecto {
@@ -23,6 +24,7 @@ model Proyecto {
   descripcion String?
   usuarios    UsuarioProyecto[]
   tareas      Tarea[]
+  materiales  Material[]
   creadoEn    DateTime          @default(now())
 }
 
@@ -37,15 +39,21 @@ model UsuarioProyecto {
 }
 
 model Tarea {
-  id          Int       @id @default(autoincrement())
-  titulo      String
-  descripcion String?
-  completada  Boolean   @default(false)
-  proyecto    Proyecto  @relation(fields: [proyectoId], references: [id])
-  proyectoId  Int
-  asignadoA   Usuario   @relation("UsuarioTarea", fields: [usuarioId], references: [id])
-  usuarioId   Int
-  creadaEn    DateTime  @default(now())
+  id            Int             @id @default(autoincrement())
+  titulo        String
+  descripcion   String?
+  estado        Estado          @default(PENDIENTE)
+  usuario       Usuario         @relation("UsuarioTarea", fields: [usuarioId], references: [id])
+  usuarioId     Int
+  proyecto      Proyecto        @relation(fields: [proyectoId], references: [id])
+  proyectoId    Int
+  horasTrabajo  HorasTrabajo[]  // <--- Relación inversa añadida aquí
+}
+
+enum Estado {
+  PENDIENTE
+  EN_PROGRESO
+  COMPLETADA
 }
 
 enum Rol {
@@ -53,3 +61,22 @@ enum Rol {
   USUARIO
 }
 
+model Material {
+  id          Int      @id @default(autoincrement())
+  nombre      String
+  cantidad    Int
+  unidad      String
+  costo       Float
+  proyecto    Proyecto @relation(fields: [proyectoId], references: [id])
+  proyectoId  Int
+}
+
+model HorasTrabajo {
+  id        Int     @id @default(autoincrement())
+  horas     Int
+  fecha     DateTime @default(now())
+  usuario   Usuario @relation(fields: [usuarioId], references: [id])
+  usuarioId Int
+  tarea     Tarea   @relation(fields: [tareaId], references: [id])
+  tareaId   Int
+}

@@ -59,9 +59,11 @@ router.patch('/tareas/:id/completar', verificarToken, async (req: AuthRequest, r
       return res.status(403).json({ error: 'No autorizado para modificar esta tarea' });
 
     const tareaActualizada = await prisma.tarea.update({
-      where: { id: tareaId },
-      data: { completada: true }
-    });
+  where: { id: tareaId },
+  data: {
+    estado: 'COMPLETADA'
+  }
+});
 
     res.json(tareaActualizada);
   } catch (error) {
