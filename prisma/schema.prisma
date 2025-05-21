@@ -1,0 +1,55 @@
+generator client {
+  provider = "prisma-client-js"
+}
+
+datasource db {
+  provider = "postgresql"
+  url      = env("DATABASE_URL")
+}
+
+model Usuario {
+  id        Int               @id @default(autoincrement())
+  nombre    String
+  email     String            @unique
+  password  String
+  rol       Rol
+  proyectos UsuarioProyecto[]
+  tareas    Tarea[]           @relation("UsuarioTarea")
+}
+
+model Proyecto {
+  id          Int               @id @default(autoincrement())
+  nombre      String
+  descripcion String?
+  usuarios    UsuarioProyecto[]
+  tareas      Tarea[]
+  creadoEn    DateTime          @default(now())
+}
+
+model UsuarioProyecto {
+  id         Int      @id @default(autoincrement())
+  usuario    Usuario  @relation(fields: [usuarioId], references: [id])
+  usuarioId  Int
+  proyecto   Proyecto @relation(fields: [proyectoId], references: [id])
+  proyectoId Int
+
+  @@unique([usuarioId, proyectoId])
+}
+
+model Tarea {
+  id          Int       @id @default(autoincrement())
+  titulo      String
+  descripcion String?
+  completada  Boolean   @default(false)
+  proyecto    Proyecto  @relation(fields: [proyectoId], references: [id])
+  proyectoId  Int
+  asignadoA   Usuario   @relation("UsuarioTarea", fields: [usuarioId], references: [id])
+  usuarioId   Int
+  creadaEn    DateTime  @default(now())
+}
+
+enum Rol {
+  ADMIN
+  USUARIO
+}
+
